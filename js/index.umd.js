@@ -1,0 +1,1 @@
+Cannot find "/dist/index.umd.js" in @project-serum/sol-wallet-adapter@0.2.6

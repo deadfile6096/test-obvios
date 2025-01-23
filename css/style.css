@@ -1,0 +1,175 @@
+/* Global styles */
+body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+    cursor: crosshair;
+}
+
+/* Animation keyframes */
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+@keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+}
+
+@keyframes flicker {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+
+.blink {
+    animation: blink 1s steps(1) infinite;
+}
+
+/* Terminal styles */
+.terminal-container {
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid #0f0;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+}
+
+.terminal-header {
+    background: rgba(0, 0, 0, 0.8);
+    border-bottom: 1px solid #0f0;
+}
+
+.terminal-window {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+/* Message styles */
+.message {
+    background: rgba(0, 0, 0, 0.6);
+    border-left: 2px solid var(--agent-color, #0f0);
+    margin: 4px 0;
+    padding: 8px 12px;
+}
+
+.message.agent-message {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.message-content {
+    line-height: 1.4;
+}
+
+.agent-name {
+    opacity: 0.8;
+    font-size: 0.9em;
+    margin-bottom: 4px;
+}
+
+/* Input styles */
+.input-line {
+    background: rgba(0, 0, 0, 0.8);
+    border-top: 1px solid #0f0;
+}
+
+input {
+    background: transparent;
+    border: none;
+    color: #0f0;
+    font-family: inherit;
+    font-size: 1em;
+}
+
+input:focus {
+    outline: none;
+}
+
+/* Status bar */
+.status-bar {
+    background: rgba(0, 0, 0, 0.8);
+    border-top: 1px solid #0f0;
+    font-size: 0.9em;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Effects */
+.glitch-text {
+    animation: glitch 0.2s infinite;
+    color: #0f0;
+}
+
+.warning {
+    color: #ff0;
+    animation: blink 1s infinite;
+}
+
+.error {
+    color: #f00;
+}
+
+/* Social buttons */
+.social-button {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #0f0;
+    color: #0f0;
+    padding: 8px 15px;
+    transition: all 0.3s ease;
+}
+
+.social-button:hover {
+    background: rgba(0, 255, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Canvas */
+#weirdCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0.8;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .terminal-container {
+        width: 95%;
+        margin: 10px auto;
+    }
+
+    .social-links {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #0f0;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #0f0;
+    opacity: 0.8;
+} 

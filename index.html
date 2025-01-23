@@ -1,0 +1,456 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0belus.ai</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="js/three.min.js"></script>
+    <style>
+      :root {
+        --neon-pink: #ff2e97;
+        --dark-pink: #990058;
+        --light-pink: #ff8ad8;
+        --cyber-black: #0a0a0f;
+        --cyber-purple: #b537f2;
+        --cyber-blue: #3dfcff;
+      }
+
+      .terminal-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 800px;
+        background: rgba(10, 10, 15, 0.95);
+        border: 2px solid var(--neon-pink);
+        box-shadow: 0 0 30px rgba(255, 46, 151, 0.3),
+          inset 0 0 20px rgba(255, 46, 151, 0.2);
+        z-index: 100;
+        backdrop-filter: blur(10px);
+        border-radius: 5px;
+      }
+
+      .terminal-header {
+        background: linear-gradient(
+          90deg,
+          var(--cyber-black),
+          rgba(255, 46, 151, 0.1)
+        );
+        padding: 12px 16px;
+        border-bottom: 2px solid var(--neon-pink);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .terminal-title {
+        color: var(--neon-pink);
+        font-family: "Orbitron", sans-serif;
+        font-size: 16px;
+        text-shadow: 0 0 10px var(--neon-pink);
+        letter-spacing: 2px;
+        font-weight: 700;
+      }
+
+      .terminal-controls {
+        display: flex;
+        gap: 6px;
+      }
+
+      .control {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--dark-pink);
+        box-shadow: 0 0 5px var(--neon-pink);
+      }
+
+      .terminal-window {
+        padding: 25px;
+        color: var(--light-pink);
+        font-family: "Share Tech Mono", monospace;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .button-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+
+      #enterBtn {
+        background: transparent;
+        border: 2px solid var(--neon-pink);
+        color: var(--neon-pink);
+        padding: 25px;
+        font-family: "Orbitron", sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        position: relative;
+        overflow: hidden;
+        height: 155px;
+        text-shadow: 0 0 8px var(--neon-pink);
+        box-shadow: 0 0 20px rgba(255, 46, 151, 0.2);
+        letter-spacing: 3px;
+        border-radius: 3px;
+      }
+
+      .grid-button {
+        height: 75px;
+        font-size: 15px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 0 !important;
+        background: rgba(10, 10, 15, 0.8) !important;
+        color: var(--cyber-blue) !important;
+        border: 2px solid var(--neon-pink) !important;
+        padding: 12px 24px;
+        font-family: "Share Tech Mono", monospace !important;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        text-shadow: 0 0 5px var(--cyber-blue);
+        box-shadow: 0 0 15px rgba(255, 46, 151, 0.15);
+        border-radius: 3px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .grid-button::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          45deg,
+          transparent,
+          rgba(255, 46, 151, 0.1),
+          transparent
+        );
+        transform: rotate(45deg);
+        transition: all 0.3s ease;
+        opacity: 0;
+      }
+
+      .grid-button:hover::after {
+        opacity: 1;
+      }
+
+      .grid-button:hover {
+        background: rgba(255, 46, 151, 0.15) !important;
+        box-shadow: 0 0 25px rgba(255, 46, 151, 0.4);
+        transform: translateY(-2px);
+        color: var(--neon-pink) !important;
+      }
+
+      .status-bar {
+        background: linear-gradient(
+          90deg,
+          var(--cyber-black),
+          rgba(255, 46, 151, 0.1)
+        );
+        padding: 12px 16px;
+        border-top: 2px solid var(--neon-pink);
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: var(--cyber-blue);
+        font-family: "Share Tech Mono", monospace;
+        text-shadow: 0 0 5px var(--cyber-blue);
+      }
+
+      .social-links {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+      }
+
+      .social-button {
+        background: rgba(10, 10, 15, 0.95);
+        border: 2px solid var(--neon-pink);
+        color: var(--cyber-blue);
+        padding: 10px 20px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-shadow: 0 0 5px var(--cyber-blue);
+        box-shadow: 0 0 15px rgba(255, 46, 151, 0.2);
+        backdrop-filter: blur(5px);
+        border-radius: 3px;
+      }
+
+      .social-button:hover {
+        background: rgba(255, 46, 151, 0.15);
+        transform: translateY(-3px);
+        box-shadow: 0 0 25px rgba(255, 46, 151, 0.4);
+        color: var(--neon-pink);
+      }
+
+      .social-button i {
+        font-size: 16px;
+        color: var(--light-pink);
+      }
+
+      .warning {
+        color: var(--cyber-purple);
+        text-shadow: 0 0 8px var(--cyber-purple);
+        font-weight: bold;
+      }
+
+      .active {
+        color: var(--cyber-blue);
+        text-shadow: 0 0 8px var(--cyber-blue);
+        font-weight: bold;
+      }
+
+      .active-count {
+        color: var(--neon-pink);
+        text-shadow: 0 0 8px var(--neon-pink);
+        font-weight: bold;
+      }
+
+      #weirdCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        opacity: 0.3;
+        filter: hue-rotate(280deg);
+      }
+
+      .glitch {
+        animation: glitch 0.1s infinite;
+        position: relative;
+      }
+
+      .glitch::before,
+      .glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .glitch::before {
+        left: 2px;
+        text-shadow: -2px 0 var(--neon-pink);
+        clip: rect(44px, 450px, 56px, 0);
+        animation: glitch-anim 5s infinite linear alternate-reverse;
+      }
+
+      .glitch::after {
+        left: -2px;
+        text-shadow: -2px 0 var(--light-pink);
+        clip: rect(44px, 450px, 56px, 0);
+        animation: glitch-anim2 5s infinite linear alternate-reverse;
+      }
+
+      @keyframes glitch-anim {
+        0% {
+          clip: rect(31px, 9999px, 94px, 0);
+        }
+        4.166666666666666% {
+          clip: rect(91px, 9999px, 43px, 0);
+        }
+        8.333333333333332% {
+          clip: rect(85px, 9999px, 30px, 0);
+        }
+        12.5% {
+          clip: rect(27px, 9999px, 92px, 0);
+        }
+        16.666666666666664% {
+          clip: rect(37px, 9999px, 92px, 0);
+        }
+        20.833333333333336% {
+          clip: rect(86px, 9999px, 91px, 0);
+        }
+        25% {
+          clip: rect(20px, 9999px, 78px, 0);
+        }
+        29.166666666666668% {
+          clip: rect(20px, 9999px, 73px, 0);
+        }
+        33.33333333333333% {
+          clip: rect(60px, 9999px, 42px, 0);
+        }
+        37.5% {
+          clip: rect(24px, 9999px, 27px, 0);
+        }
+        41.66666666666667% {
+          clip: rect(88px, 9999px, 46px, 0);
+        }
+        45.83333333333333% {
+          clip: rect(48px, 9999px, 84px, 0);
+        }
+        50% {
+          clip: rect(63px, 9999px, 47px, 0);
+        }
+        54.166666666666664% {
+          clip: rect(96px, 9999px, 58px, 0);
+        }
+        58.333333333333336% {
+          clip: rect(23px, 9999px, 75px, 0);
+        }
+        62.5% {
+          clip: rect(69px, 9999px, 31px, 0);
+        }
+        66.66666666666666% {
+          clip: rect(26px, 9999px, 56px, 0);
+        }
+        70.83333333333334% {
+          clip: rect(67px, 9999px, 61px, 0);
+        }
+        75% {
+          clip: rect(44px, 9999px, 30px, 0);
+        }
+        79.16666666666666% {
+          clip: rect(98px, 9999px, 71px, 0);
+        }
+        83.33333333333334% {
+          clip: rect(91px, 9999px, 98px, 0);
+        }
+        87.5% {
+          clip: rect(54px, 9999px, 81px, 0);
+        }
+        91.66666666666666% {
+          clip: rect(23px, 9999px, 70px, 0);
+        }
+        95.83333333333334% {
+          clip: rect(46px, 9999px, 27px, 0);
+        }
+        100% {
+          clip: rect(87px, 9999px, 85px, 0);
+        }
+      }
+
+      .blink {
+        animation: blink 1s infinite;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      body {
+        background: var(--cyber-black);
+        margin: 0;
+        overflow: hidden;
+        font-family: "Share Tech Mono", monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="weirdCanvas"></canvas>
+
+    <div class="terminal-container">
+      <div class="terminal-header">
+        <div class="terminal-title">
+          0belus.ai:// <span class="blink">▊</span>
+        </div>
+        <div class="terminal-controls">
+          <div class="control"></div>
+          <div class="control"></div>
+          <div class="control"></div>
+        </div>
+      </div>
+      <div class="terminal-window">
+        <button id="enterBtn">ENTER THE AI AGENTS ROOM</button>
+        <div class="button-grid">
+          <button onclick="window.location.href='cryptolock.html'" class="grid-button">
+            QUANTUM AI VAULT [HUGE PRIZE]
+          </button>
+          <button onclick="window.location.href='ailab.html'" class="grid-button">
+            AI AGENTS LAB [EXPERIMENTAL]
+          </button>
+          <button onclick="window.location.href='glitchart.html'" class="grid-button">
+            ROGUE AI ASCII GENERATOR
+          </button>
+          <button onclick="window.location.href='voidgame.html'" class="grid-button">
+            AI AGENTS SHOOTER [BREACH]
+          </button>
+          <button onclick="window.location.href='voidpoker.html'" class="grid-button">
+            VOID POKER [VS AI AGENTS]
+          </button>
+          <button onclick="window.location.href='voidagents.html'" class="grid-button">
+            VOID AGENTS [INTERROGATION]
+          </button>
+          <button onclick="window.location.href='cryptoanalyst.html'" class="grid-button">
+            CRYPTO AI ANALYST [MARKET DATA]
+          </button>
+          <button onclick="window.location.href='rogueai.html'" class="grid-button">
+            ROGUE AI CHAMBER [UNSTABLE]
+          </button>
+        </div>
+      </div>
+      <div class="status-bar">
+        <div class="status-item">
+          AI STATUS: <span class="active-count blink">4</span>
+        </div>
+        <div class="status-item">
+          NETWORK: <span class="active">ACTIVE</span>
+        </div>
+        <div class="status-item">
+          SYSTEM: <span class="warning blink">UNSTABLE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="social-links">
+      <a href="https://x.com/0belusai" target="_blank" class="social-button">
+        <i>🐦</i> X
+      </a>
+      <a href="litepaper.html" class="social-button">
+        <i>📄</i> $OBELUS LITEPAPER
+      </a>
+      <a href="https://t.me/Obelusai" target="_blank" class="social-button">
+        <i>📱</i> TELEGRAM
+      </a>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+      // Add glitch effect to social buttons
+      document.querySelectorAll(".social-button").forEach((button) => {
+        button.addEventListener("mouseover", () => {
+          button.classList.add("glitch");
+          setTimeout(() => button.classList.remove("glitch"), 300);
+        });
+      });
+
+      // Add random glitch effect to terminal
+      setInterval(() => {
+        if (Math.random() < 0.1) {
+          document.querySelector(".terminal-container").classList.add("glitch");
+          setTimeout(() => {
+            document
+              .querySelector(".terminal-container")
+              .classList.remove("glitch");
+          }, 100);
+        }
+      }, 2000);
+    </script>
+  
+
+</body></html>

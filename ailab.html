@@ -1,0 +1,568 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agents Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/cyberpunk-theme.css">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        cursor: crosshair;
+        overflow-x: hidden;
+        background: var(--cyber-black);
+      }
+
+      #back-button {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 100;
+      }
+
+      .container {
+        display: flex;
+        min-height: 100vh;
+        margin: 0;
+        padding-top: 60px; /* Space for back button */
+      }
+
+      .sidebar {
+        width: 320px;
+        background: rgba(10, 10, 15, 0.95);
+        border-right: 2px solid var(--neon-pink);
+        padding: 20px;
+        box-shadow: 0 0 20px rgba(255, 46, 151, 0.2);
+        backdrop-filter: blur(10px);
+        height: calc(100vh - 60px); /* Adjust for top padding */
+        position: fixed;
+        top: 60px;
+        left: 0;
+        overflow-y: auto;
+        z-index: 10;
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 20px 40px;
+        margin-left: 320px; /* Width of sidebar */
+        background: linear-gradient(
+          135deg,
+          rgba(10, 10, 15, 0.95),
+          rgba(255, 46, 151, 0.05)
+        );
+        min-height: calc(100vh - 100px); /* Account for padding */
+      }
+
+      .model-list {
+        margin: 20px 0;
+      }
+
+      .model-item {
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 2px solid var(--neon-pink);
+        background: rgba(10, 10, 15, 0.8);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 3px;
+        position: relative;
+        color: var(--cyber-blue);
+        text-shadow: 0 0 5px var(--cyber-blue);
+      }
+
+      .model-item:hover {
+        transform: translateX(5px);
+        background: rgba(255, 46, 151, 0.1);
+        border-color: var(--cyber-blue);
+      }
+
+      .model-item:before {
+        content: "[AI AGENT]";
+        position: absolute;
+        top: -10px;
+        right: 10px;
+        font-size: 12px;
+        color: var(--neon-pink);
+        background: var(--cyber-black);
+        padding: 2px 5px;
+        border: 1px solid var(--neon-pink);
+      }
+
+      .model-info {
+        border: 2px solid var(--neon-pink);
+        padding: 25px;
+        margin-bottom: 30px;
+        background: rgba(10, 10, 15, 0.9);
+        box-shadow: 0 0 20px rgba(255, 46, 151, 0.2);
+        border-radius: 3px;
+      }
+
+      .terminal {
+        background: rgba(10, 10, 15, 0.9);
+        border: 2px solid var(--neon-pink);
+        padding: 20px;
+        height: 250px;
+        overflow-y: auto;
+        margin-bottom: 30px;
+        font-family: "Share Tech Mono", monospace;
+        color: var(--cyber-blue);
+        text-shadow: 0 0 3px var(--cyber-blue);
+        box-shadow: 0 0 30px rgba(255, 46, 151, 0.2);
+        border-radius: 3px;
+        line-height: 1.5;
+      }
+
+      #output-display {
+        margin: 30px 0;
+      }
+
+      .image-container,
+      .text-container {
+        margin-bottom: 30px;
+        padding: 25px;
+        border: 2px solid var(--neon-pink);
+        background: rgba(10, 10, 15, 0.9);
+        min-height: 100px;
+        border-radius: 3px;
+        box-shadow: 0 0 20px rgba(255, 46, 151, 0.2);
+      }
+
+      .text-container {
+        font-family: "Share Tech Mono", monospace;
+        color: var(--cyber-blue);
+        text-shadow: 0 0 3px var(--cyber-blue);
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+
+      .input-area {
+        position: sticky;
+        bottom: 0;
+        background: rgba(10, 10, 15, 0.95);
+        padding: 20px;
+        border-top: 2px solid var(--neon-pink);
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        backdrop-filter: blur(10px);
+        margin: 0 -40px;
+        padding: 20px 40px;
+      }
+
+      .cyber-input {
+        flex: 1;
+        min-width: 200px;
+        background: rgba(10, 10, 15, 0.8);
+        border: 2px solid var(--neon-pink);
+        color: var(--cyber-blue);
+        padding: 12px 15px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 16px;
+        border-radius: 3px;
+      }
+
+      .cyber-input:focus {
+        outline: none;
+        box-shadow: 0 0 20px rgba(255, 46, 151, 0.3);
+      }
+
+      .progress-bar {
+        height: 2px;
+        background: var(--neon-pink);
+        width: 0%;
+        transition: width 0.3s;
+        box-shadow: 0 0 10px var(--neon-pink);
+        margin-top: 10px;
+      }
+
+      .example-prompt {
+        padding: 15px;
+        border-left: 2px solid var(--neon-pink);
+        margin: 15px 0;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: rgba(255, 46, 151, 0.05);
+        color: var(--cyber-blue);
+        border-radius: 0 3px 3px 0;
+      }
+
+      .example-prompt:hover {
+        background: rgba(255, 46, 151, 0.1);
+        transform: translateX(5px);
+        border-color: var(--cyber-blue);
+      }
+
+      .status {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background: rgba(10, 10, 15, 0.95);
+        border: 2px solid var(--neon-pink);
+        box-shadow: 0 0 15px rgba(255, 46, 151, 0.2);
+        color: var(--cyber-blue);
+        font-family: "Share Tech Mono", monospace;
+        text-shadow: 0 0 5px var(--cyber-blue);
+        border-radius: 3px;
+        backdrop-filter: blur(5px);
+        z-index: 1000;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 1024px) {
+        .container {
+          flex-direction: column;
+          padding-top: 70px;
+        }
+
+        .sidebar {
+          position: relative;
+          width: auto;
+          height: auto;
+          top: 0;
+          border-right: none;
+          border-bottom: 2px solid var(--neon-pink);
+          padding: 20px 40px;
+        }
+
+        .main-content {
+          margin-left: 0;
+          padding: 20px 40px;
+        }
+
+        .model-list {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 20px;
+        }
+
+        .model-item {
+          margin-bottom: 0;
+        }
+
+        .input-area {
+          position: relative;
+          margin: 30px -40px -20px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding-top: 60px;
+        }
+
+        .sidebar,
+        .main-content {
+          padding: 20px;
+        }
+
+        .model-list {
+          grid-template-columns: 1fr;
+        }
+
+        .input-area {
+          flex-direction: column;
+          margin: 30px -20px -20px;
+          padding: 20px;
+        }
+
+        .cyber-input,
+        .cyber-button {
+          width: 100%;
+        }
+
+        .status {
+          bottom: 10px;
+          right: 10px;
+          font-size: 14px;
+          padding: 8px 16px;
+        }
+
+        .terminal {
+          height: 200px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="index.html" class="cyber-button" id="back-button">◀ RETURN</a>
+
+    <div class="container">
+      <div class="sidebar">
+        <h2 class="cyber-title">AI LAB</h2>
+        <p class="cyber-subtitle">Neural Processing Units</p>
+
+        <div class="model-list">
+          <div class="model-item" onclick="selectModel('agent-alpha')">
+            ALPHA AGENT
+            <div class="progress-bar"></div>
+          </div>
+          <div class="model-item" onclick="selectModel('agent-omega')">
+            OMEGA AGENT
+            <div class="progress-bar"></div>
+          </div>
+          <div class="model-item" onclick="selectModel('agent-sigma')">
+            SIGMA AGENT
+            <div class="progress-bar"></div>
+          </div>
+          <div class="model-item" onclick="selectModel('agent-delta')">
+            DELTA AGENT
+            <div class="progress-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="model-info">
+          <h3 class="cyber-title">
+            MODEL: <span id="current-model">NONE</span>
+          </h3>
+          <div id="model-description" class="cyber-text"></div>
+          <div id="example-prompts"></div>
+        </div>
+
+        <div class="terminal" id="terminal">
+          > SYSTEM INITIALIZED > SELECT MODEL TO BEGIN
+        </div>
+
+        <div id="output-display">
+          <div id="image-output" class="image-container"></div>
+          <div id="text-output" class="text-container"></div>
+        </div>
+
+        <div class="input-area">
+          <input type="text" id="user-input" class="cyber-input" placeholder="ENTER PROMPT_">
+          <button onclick="runModel()" class="cyber-button">RUN</button>
+          <button onclick="stopModel()" class="cyber-button">ABORT</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="status" id="status">SYSTEM: READY</div>
+
+    <script src="js/ort.min.js"></script>
+    <script src="js/tf.min.js"></script>
+    <script>
+      let currentModel = null;
+      let modelInstance = null;
+      const terminal = document.getElementById("terminal");
+
+      const models = {
+        "agent-alpha": {
+          name: "ALPHA AGENT",
+          description:
+            "Strategic command and control AI agent specialized in system operations",
+          type: "text",
+          examples: [
+            "Analyze system vulnerabilities",
+            "Calculate optimal resource allocation",
+            "Generate infiltration strategies",
+          ],
+        },
+        "agent-omega": {
+          name: "OMEGA AGENT",
+          description:
+            "Resource management and optimization AI agent with advanced prediction capabilities",
+          type: "text",
+          examples: [
+            "Predict system behavior",
+            "Optimize power distribution",
+            "Calculate success probabilities",
+          ],
+        },
+        "agent-sigma": {
+          name: "SIGMA AGENT",
+          description: "Pattern analysis and behavioral prediction AI agent",
+          type: "text",
+          examples: [
+            "Analyze behavior patterns",
+            "Detect anomalies",
+            "Generate response scenarios",
+          ],
+        },
+        "agent-delta": {
+          name: "DELTA AGENT",
+          description:
+            "Infiltration and security breach AI agent with stealth capabilities",
+          type: "image",
+          examples: [
+            "Generate security bypasses",
+            "Create stealth protocols",
+            "Design infiltration paths",
+          ],
+        },
+      };
+
+      function log(message) {
+        const timestamp = new Date().toLocaleTimeString();
+        terminal.innerHTML += `\n[${timestamp}] > ${message}`;
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+
+      async function loadModel(model) {
+        const modelInfo = models[model];
+        const progressBar = document.querySelector(
+          `[onclick="selectModel('${model}')"] .progress-bar`
+        );
+
+        try {
+          log(`INITIALIZING ${modelInfo.name}`);
+          document.getElementById(
+            "status"
+          ).textContent = `SYSTEM: LOADING ${modelInfo.name}`;
+
+          // Simulate loading progress
+          for (let i = 0; i <= 100; i += 5) {
+            progressBar.style.width = `${i}%`;
+            await new Promise((r) => setTimeout(r, 100));
+          }
+
+          log("NEURAL CORE LOADED");
+          document.getElementById("status").textContent = "SYSTEM: READY";
+          return true;
+        } catch (error) {
+          log(`ERROR: ${error.message}`);
+          document.getElementById("status").textContent = "SYSTEM: ERROR";
+          return false;
+        }
+      }
+
+      async function selectModel(model) {
+        currentModel = model;
+        const modelInfo = models[model];
+
+        document.getElementById("current-model").textContent = modelInfo.name;
+        document.getElementById("model-description").textContent =
+          modelInfo.description;
+
+        // Update examples
+        const examplesDiv = document.getElementById("example-prompts");
+        examplesDiv.innerHTML =
+          '<h4 class="cyber-subtitle">COMMAND_TEMPLATES:</h4>';
+        modelInfo.examples.forEach((example) => {
+          const promptDiv = document.createElement("div");
+          promptDiv.className = "example-prompt";
+          promptDiv.textContent = example;
+          promptDiv.onclick = () => {
+            document.getElementById("user-input").value = example;
+          };
+          examplesDiv.appendChild(promptDiv);
+        });
+
+        // Load the model
+        await loadModel(model);
+      }
+
+      async function runModel() {
+        if (!currentModel) {
+          log("ERROR: NO MODEL SELECTED");
+          return;
+        }
+
+        const input = document.getElementById("user-input").value;
+        if (!input) {
+          log("ERROR: NO INPUT DETECTED");
+          return;
+        }
+
+        log(`EXECUTING: ${input}`);
+        document.getElementById("status").textContent = "SYSTEM: PROCESSING";
+
+        try {
+          // Generate matrix-like processing animation
+          const processingInterval = setInterval(() => {
+            log(generateMatrixLine());
+          }, 200);
+
+          // Simulate processing delay
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          clearInterval(processingInterval);
+
+          // Generate response based on model type
+          const modelInfo = models[currentModel];
+          let response;
+
+          if (input.startsWith("ANALYZE:")) {
+            response = generateAnalysis(input.substring(9));
+          } else if (input.startsWith("GENERATE:")) {
+            response = generateCreativeText(input.substring(10));
+          } else if (input.startsWith("DEBUG:")) {
+            response = generateDebugResponse(input.substring(7));
+          } else {
+            response = generateGenericResponse(input);
+          }
+
+          // Display result
+          log("OUTPUT:");
+          log(response);
+
+          const outputDiv = document.getElementById("text-output");
+          outputDiv.innerHTML = `<div class="response-text">${response}</div>`;
+
+          document.getElementById("status").textContent = "SYSTEM: READY";
+        } catch (error) {
+          log(`ERROR: ${error.message}`);
+          document.getElementById("status").textContent = "SYSTEM: ERROR";
+        }
+      }
+
+      function generateMatrixLine() {
+        const chars = "01";
+        return Array(40)
+          .fill(0)
+          .map(() => chars[Math.floor(Math.random() * chars.length)])
+          .join("");
+      }
+
+      function generateAnalysis(topic) {
+        return `ANALYSIS REPORT:
+- Quantum probability matrix computed
+- Neural pathways mapped
+- Cybernetic analysis complete
+- Pattern recognition initialized
+- Confidence level: 87.3%
+
+RESULTS: ${topic.toUpperCase()} analysis complete.
+RECOMMENDATION: Implement quantum error correction`;
+      }
+
+      function generateCreativeText(prompt) {
+        return `NEURAL NARRATIVE GENERATED:
+In Neo-Tokyo's neon-drenched underbelly, a rogue AI hunter named Zero tracked quantum signatures through rain-slicked streets. Her neural implants buzzed with encrypted data streams. The target: a self-aware virus threatening to collapse the city's digital infrastructure. Time was running out. With a thought, she interfaced with the mainframe. The virus waited, its code a beautiful, deadly dance of light.`;
+      }
+
+      function generateDebugResponse(issue) {
+        return `DEBUG LOG:
+[SCANNING] ${issue}
+[DETECTED] Anomaly in neural pathway
+[ANALYZING] Quantum state fluctuations
+[ISOLATING] Corrupted data segments
+[REPAIRING] Neural connections
+[STATUS] Debug sequence complete
+[RECOMMENDATION] Implement quantum error correction`;
+      }
+
+      function generateGenericResponse(input) {
+        return `PROCESSING: ${input}
+[ANALYZING] Input parameters
+[COMPUTING] Neural response
+[GENERATING] Synthetic output
+[STATUS] Processing complete
+[CONFIDENCE] 89.2% accuracy`;
+      }
+
+      function stopModel() {
+        log("PROCESS TERMINATED");
+        document.getElementById("status").textContent = "SYSTEM: READY";
+      }
+
+      // Initialize
+      log("NEURAL INTERFACE ACTIVE");
+      log("SYSTEM INITIALIZED");
+      log("AWAITING MODEL SELECTION");
+    </script>
+  
+
+</body></html>
